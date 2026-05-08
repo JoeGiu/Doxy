@@ -10,16 +10,16 @@ import pymysql
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
 
-# Secret key per la gestione delle sessioni Flask
-app.secret_key = 'doxy-secret-key-2024'
+# Secret key — legge da env, fallback al valore di sviluppo locale
+app.secret_key = os.environ.get('SECRET_KEY', 'doxy-secret-key-2024')
 
-# Configurazione connessione al database MySQL
+# Configurazione connessione al database MySQL (env vars con fallback locali)
 DB_CONFIG = {
-    'host': 'localhost',
-    'port': 3306,
-    'database': 'doxy_db',
-    'user': 'root',
-    'password': 'Giuseppe',
+    'host':     os.environ.get('MYSQL_HOST',     'localhost'),
+    'port':     int(os.environ.get('MYSQL_PORT', 3306)),
+    'database': os.environ.get('MYSQL_DATABASE', 'doxy_db'),
+    'user':     os.environ.get('MYSQL_USER',     'root'),
+    'password': os.environ.get('MYSQL_PASSWORD', 'Giuseppe'),
     'cursorclass': pymysql.cursors.DictCursor,
     'charset': 'utf8mb4'
 }
@@ -1487,5 +1487,6 @@ def pwa_doxy_files(filename):
 
 
 if __name__ == '__main__':
-    # Avvia l'app Flask sulla porta 8080 in modalità debug
-    app.run(debug=True, host='0.0.0.0', port=8080)
+    debug = os.environ.get('FLASK_DEBUG', 'false').lower() == 'true'
+    port  = int(os.environ.get('PORT', 8080))
+    app.run(debug=debug, host='0.0.0.0', port=port)
