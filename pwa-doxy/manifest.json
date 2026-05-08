@@ -1,0 +1,19 @@
+{
+  "name": "Doxy Notifiche",
+  "short_name": "Doxy",
+  "description": "Ricevi segnalazioni problemi veicoli",
+  "start_url": "/pwa/doxy/",
+  "scope": "/pwa/doxy/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#198754",
+  "theme_color": "#198754",
+  "icons": [
+    {
+      "src": "/pwa/doxy/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

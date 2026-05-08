@@ -1,0 +1,19 @@
+{
+  "name": "Doxy Autista",
+  "short_name": "Doxy Autista",
+  "description": "Segnala problemi ai veicoli Doxy",
+  "start_url": "/pwa/autista/",
+  "scope": "/pwa/autista/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0d6efd",
+  "theme_color": "#0d6efd",
+  "icons": [
+    {
+      "src": "/pwa/autista/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block title %}Nuovo Utente{% endblock %}
+
+{% block content %}
+<!-- Intestazione -->
+<div class="d-flex align-items-center mb-4">
+    <a href="/utenti" class="btn btn-outline-secondary btn-sm me-3">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+             class="bi bi-arrow-left me-1" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/>
+        </svg>
+        Torna agli Utenti
+    </a>
+    <h2 class="fw-bold text-dark mb-0">Nuovo Utente</h2>
+</div>
+
+<div class="card">
+    <div class="card-body p-4">
+        <form method="POST" action="/utenti/nuovo" novalidate>
+
+            <!-- Sezione: Dati anagrafici -->
+            <h6 class="text-uppercase text-muted fw-semibold small mb-3 border-bottom pb-2">
+                Dati Anagrafici
+            </h6>
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <label for="nome" class="form-label fw-semibold">
+                        Nome <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" class="form-control" id="nome" name="nome"
+                           value="{{ form.get('nome', '') }}" required>
+                </div>
+                <div class="col-md-4">
+                    <label for="cognome" class="form-label fw-semibold">
+                        Cognome <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" class="form-control" id="cognome" name="cognome"
+                           value="{{ form.get('cognome', '') }}" required>
+                </div>
+                <div class="col-md-4">
+                    <label for="codice_fiscale" class="form-label fw-semibold">Codice Fiscale</label>
+                    <input type="text" class="form-control text-uppercase" id="codice_fiscale"
+                           name="codice_fiscale" maxlength="16"
+                           value="{{ form.get('codice_fiscale', '') }}">
+                </div>
+                <div class="col-md-4">
+                    <label for="data_nascita" class="form-label fw-semibold">Data di Nascita</label>
+                    <input type="date" class="form-control" id="data_nascita" name="data_nascita"
+                           value="{{ form.get('data_nascita', '') }}">
+                </div>
+                <div class="col-md-4">
+                    <label for="localita_nascita" class="form-label fw-semibold">Luogo di Nascita</label>
+                    <input type="text" class="form-control" id="localita_nascita" name="localita_nascita"
+                           value="{{ form.get('localita_nascita', '') }}">
+                </div>
+            </div>
+
+            <!-- Sezione: Contatti -->
+            <h6 class="text-uppercase text-muted fw-semibold small mb-3 border-bottom pb-2">
+                Contatti
+            </h6>
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <label for="email" class="form-label fw-semibold">
+                        Email <span class="text-danger">*</span>
+                    </label>
+                    <input type="email" class="form-control" id="email" name="email"
+                           value="{{ form.get('email', '') }}" required>
+                </div>
+                <div class="col-md-3">
+                    <label for="telefono" class="form-label fw-semibold">Telefono</label>
+                    <input type="tel" class="form-control" id="telefono" name="telefono"
+                           value="{{ form.get('telefono', '') }}">
+                </div>
+                <div class="col-md-3">
+                    <label for="matricola" class="form-label fw-semibold">
+                        Matricola <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" class="form-control" id="matricola" name="matricola"
+                           value="{{ form.get('matricola', '') }}" required>
+                </div>
+            </div>
+
+            <!-- Sezione: Residenza -->
+            <h6 class="text-uppercase text-muted fw-semibold small mb-3 border-bottom pb-2">
+                Residenza
+            </h6>
+            <div class="row g-3 mb-4">
+                <div class="col-md-8">
+                    <label for="indirizzo_residenza" class="form-label fw-semibold">Indirizzo</label>
+                    <input type="text" class="form-control" id="indirizzo_residenza"
+                           name="indirizzo_residenza"
+                           value="{{ form.get('indirizzo_residenza', '') }}">
+                </div>
+                <div class="col-md-4">
+                    <label for="localita_residenza" class="form-label fw-semibold">Località</label>
+                    <input type="text" class="form-control" id="localita_residenza"
+                           name="localita_residenza"
+                           value="{{ form.get('localita_residenza', '') }}">
+                </div>
+            </div>
+
+            <!-- Sezione: Domicilio -->
+            <h6 class="text-uppercase text-muted fw-semibold small mb-3 border-bottom pb-2">
+                Domicilio
+            </h6>
+            <div class="row g-3 mb-4">
+                <div class="col-md-8">
+                    <label for="indirizzo_domicilio" class="form-label fw-semibold">Indirizzo</label>
+                    <input type="text" class="form-control" id="indirizzo_domicilio"
+                           name="indirizzo_domicilio"
+                           value="{{ form.get('indirizzo_domicilio', '') }}">
+                </div>
+                <div class="col-md-4">
+                    <label for="localita_domicilio" class="form-label fw-semibold">Località</label>
+                    <input type="text" class="form-control" id="localita_domicilio"
+                           name="localita_domicilio"
+                           value="{{ form.get('localita_domicilio', '') }}">
+                </div>
+            </div>
+
+            <!-- Sezione: Credenziali -->
+            <h6 class="text-uppercase text-muted fw-semibold small mb-3 border-bottom pb-2">
+                Credenziali
+            </h6>
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <label for="password" class="form-label fw-semibold">
+                        Password <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" class="form-control" id="password" name="password"
+                           value="{{ form.get('password', '') }}" required>
+                </div>
+            </div>
+
+            <!-- Pulsanti -->
+            <div class="d-flex gap-2 pt-2 border-top">
+                <button type="submit" class="btn btn-primary px-4 fw-semibold">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                         class="bi bi-save me-1" viewBox="0 0 16 16">
+                        <path d="M2 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H9.5a1 1 0 0 0-1 1v7.293l2.646-2.647a.5.5 0 0 1 .708.708l-3.5 3.5a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L7.5 9.293V2a2 2 0 0 1 2-2H14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h2.5a.5.5 0 0 1 0 1z"/>
+                    </svg>
+                    Salva Utente
+                </button>
+                <a href="/utenti" class="btn btn-outline-secondary px-4">Annulla</a>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<p class="text-muted small mt-3"><span class="text-danger">*</span> Campi obbligatori</p>
+{% endblock %}

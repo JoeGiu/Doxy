@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<!-- Intestazione pagina -->
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <h2 class="fw-bold text-dark mb-0">{{ page_title }}</h2>
+    <div class="d-flex align-items-center gap-2">
+        {% if action_url %}
+        <a href="{{ action_url }}" class="btn btn-primary btn-sm px-3">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                 class="bi bi-plus-lg me-1" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2"/>
+            </svg>
+            {{ action_label }}
+        </a>
+        {% endif %}
+        {% if not errore %}
+        <span class="badge bg-primary badge-count px-3 py-2">
+            {{ righe|length }} record
+        </span>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Barra di ricerca (opzionale) -->
+{% if search_url %}
+<form method="GET" action="{{ search_url }}" class="mb-4">
+    <div class="input-group">
+        <span class="input-group-text bg-white border-end-0">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                 class="bi bi-search text-muted" viewBox="0 0 16 16">
+                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.099zm-5.242 1.656a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11"/>
+            </svg>
+        </span>
+        <input type="text" class="form-control border-start-0 ps-0" name="q"
+               value="{{ search_query or '' }}"
+               placeholder="Cerca per matricola, nome, cognome, codice fiscale…"
+               autocomplete="off">
+        <button type="submit" class="btn btn-primary px-3">Cerca</button>
+        {% if search_query %}
+        <a href="{{ search_url }}" class="btn btn-outline-secondary px-3" title="Rimuovi filtro">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                 class="bi bi-x-lg" viewBox="0 0 16 16">
+                <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+            </svg>
+            Reset
+        </a>
+        {% endif %}
+    </div>
+    {% if search_query %}
+    <small class="text-muted mt-1 d-block">
+        Risultati per <strong>"{{ search_query }}"</strong> — {{ righe|length }} trovati
+    </small>
+    {% endif %}
+</form>
+{% endif %}
+
+<!-- Messaggio di errore -->
+{% if errore %}
+<div class="alert alert-danger d-flex align-items-center" role="alert">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
+         class="bi bi-exclamation-triangle-fill me-2" viewBox="0 0 16 16">
+        <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5m.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2"/>
+    </svg>
+    <strong>{{ errore }}</strong>
+</div>
+
+<!-- Nessun record -->
+{% elif righe|length == 0 %}
+<div class="card">
+    <div class="card-body text-center py-5 text-muted">
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor"
+             class="bi bi-inbox mb-3 d-block mx-auto" viewBox="0 0 16 16">
+            <path d="M4.98 4a.5.5 0 0 0-.39.188L1.54 8H6a.5.5 0 0 1 .5.5 1.5 1.5 0 1 0 3 0A.5.5 0 0 1 10 8h4.46l-3.05-3.812A.5.5 0 0 0 11.02 4zm-1.17-.437A1.5 1.5 0 0 1 4.98 3h6.04a1.5 1.5 0 0 1 1.17.563l3.7 4.625a.5.5 0 0 1 .1.374l-.799 5.742a1.5 1.5 0 0 1-1.485 1.296H2.29a1.5 1.5 0 0 1-1.485-1.296L.006 8.562a.5.5 0 0 1 .1-.374z"/>
+        </svg>
+        <p class="mb-0">Nessun dato trovato.</p>
+    </div>
+</div>
+
+<!-- Tabella dati -->
+{% else %}
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        {% for col in colonne %}
+                        <th class="{{ 'ps-4' if loop.first else '' }}">
+                            {{ col | replace('_', ' ') | title }}
+                        </th>
+                        {% endfor %}
+                        {% if row_edit_url %}
+                        <th class="pe-4 text-end">Azioni</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for riga in righe %}
+                    <tr>
+                        {% for col in colonne %}
+                        <td class="{{ 'ps-4' if loop.first else '' }}">
+                            {{ riga[col] if riga[col] is not none else '—' }}
+                        </td>
+                        {% endfor %}
+                        {% if row_edit_url %}
+                        <td class="pe-4 text-end">
+                            <div class="d-inline-flex gap-1">
+                                <!-- Pulsante Modifica -->
+                                <a href="{{ row_edit_url }}/{{ riga[row_id_key] }}"
+                                   class="btn btn-outline-primary btn-sm" title="Modifica">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+                                         fill="currentColor" class="bi bi-pencil" viewBox="0 0 16 16">
+                                        <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325"/>
+                                    </svg>
+                                    Modifica
+                                </a>
+
+                                {% if row_delete_url %}
+                                <!-- Pulsante Elimina → apre il modale di conferma -->
+                                <button type="button"
+                                        class="btn btn-outline-danger btn-sm btn-elimina"
+                                        title="Elimina"
+                                        data-id="{{ riga[row_id_key] }}"
+                                        data-label="{% for k in row_delete_label_keys %}{{ riga[k] or '' }}{% if not loop.last %} {% endif %}{% endfor %}"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#modalElimina">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+                                         fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
+                                        <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5"/>
+                                    </svg>
+                                    Elimina
+                                </button>
+                                {% endif %}
+                            </div>
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modale di conferma eliminazione (unica istanza, popolata via JS) -->
+{% if row_delete_url %}
+<div class="modal fade" id="modalElimina" tabindex="-1" aria-labelledby="modalEliminaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-danger text-white border-0">
+                <h5 class="modal-title" id="modalEliminaLabel">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor"
+                         class="bi bi-exclamation-triangle-fill me-2 mb-1" viewBox="0 0 16 16">
+                        <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5m.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2"/>
+                    </svg>
+                    Conferma eliminazione
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body py-4">
+                <p class="mb-1">Sei sicuro di voler eliminare questo utente?</p>
+                <p class="fw-bold fs-5 mb-0" id="modalEliminaNome"></p>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+                <form id="formElimina" method="POST" action="" class="d-inline">
+                    <button type="submit" class="btn btn-danger">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor"
+                             class="bi bi-trash3 me-1" viewBox="0 0 16 16">
+                            <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5"/>
+                        </svg>
+                        Sì, elimina
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Popola il modale con nome e action URL al click del pulsante Elimina
+    document.querySelectorAll('.btn-elimina').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const id    = this.dataset.id;
+            const label = this.dataset.label;
+            document.getElementById('modalEliminaNome').textContent = label;
+            document.getElementById('formElimina').action = '{{ row_delete_url }}/' + id;
+        });
+    });
+</script>
+{% endif %}
+
+{% endif %}
+{% endblock %}

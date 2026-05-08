@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Doxy Notifiche">
+  <meta name="theme-color" content="#198754">
+  <title>Doxy Notifiche</title>
+  <link rel="manifest" href="/pwa/doxy/manifest.json">
+  <link rel="apple-touch-icon" href="/pwa/doxy/icon.svg">
+  <link rel="stylesheet" href="/pwa/doxy/style.css">
+</head>
+<body>
+
+<!-- Header (solo screenMain) -->
+<header class="app-header" id="appHeader" style="display:none">
+  <h1>
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+      <path d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4.414a1 1 0 0 0-.707.293L.854 15.146A.5.5 0 0 1 0 14.793z"/>
+    </svg>
+    Segnalazioni
+    <span class="badge-count d-none" id="badgeCount"></span>
+  </h1>
+  <div class="header-right">
+    <span class="header-user" id="headerUser"></span>
+    <button class="btn-logout" id="btnLogout">Esci</button>
+  </div>
+</header>
+
+<!-- ── Schermata Login ─────────────────────────────────────────────────── -->
+<div class="screen" id="screenLogin">
+  <div class="login-wrap">
+    <div class="logo-wrap">
+      <div class="logo-circle">
+        <svg xmlns="http://www.w3.org/2000/svg" width="38" height="38" fill="white" viewBox="0 0 16 16">
+          <path d="M3.904 1.777C4.978 1.289 6.427 1 8 1s3.022.289 4.096.777C13.125 2.245 14 2.993 14 4s-.875 1.755-1.904 2.223C11.022 6.711 9.573 7 8 7s-3.022-.289-4.096-.777C2.875 5.755 2 5.007 2 4s.875-1.755 1.904-2.223"/>
+          <path d="M2 6.161V7c0 1.007.875 1.755 1.904 2.223C4.978 9.71 6.427 10 8 10s3.022-.29 4.096-.777C13.125 8.755 14 8.007 14 7v-.839c-.457.432-1.004.751-1.49.972C11.278 7.684 9.682 8 8 8s-3.278-.316-4.51-.867c-.486-.22-1.033-.54-1.49-.972"/>
+          <path d="M2 9.161V10c0 1.007.875 1.755 1.904 2.223C4.978 12.711 6.427 13 8 13s3.022-.289 4.096-.777C13.125 11.755 14 11.007 14 10v-.839c-.457.432-1.004.751-1.49.972C11.278 10.684 9.682 11 8 11s-3.278-.316-4.51-.867c-.486-.22-1.033-.54-1.49-.972"/>
+          <path d="M2 12.161V13c0 1.007.875 1.755 1.904 2.223C4.978 15.711 6.427 16 8 16s3.022-.289 4.096-.777C13.125 14.755 14 14.007 14 13v-.839c-.457.432-1.004.751-1.49.972C11.278 13.684 9.682 14 8 14s-3.278-.316-4.51-.867c-.486-.22-1.033-.54-1.49-.972"/>
+        </svg>
+      </div>
+      <div class="app-name">Doxy Notifiche</div>
+      <div class="app-sub">Pannello segnalazioni veicoli</div>
+    </div>
+    <div class="card">
+      <div id="loginAlert"></div>
+      <form id="formLogin" novalidate>
+        <div class="form-group">
+          <label for="loginEmail">Email <span class="required">*</span></label>
+          <input type="email" class="form-control" id="loginEmail"
+                 placeholder="la-tua@email.com" required autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label for="loginPassword">Password <span class="required">*</span></label>
+          <input type="password" class="form-control" id="loginPassword"
+                 placeholder="••••••••" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn btn-primary" id="btnLogin">Accedi</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ── Schermata Principale ──────────────────────────────────────────────── -->
+<div class="screen" id="screenMain">
+  <div class="list-header">
+    <h2>Tutte le segnalazioni</h2>
+    <button class="btn-refresh" id="btnRefresh">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+        <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"/>
+        <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466"/>
+      </svg>
+      Aggiorna
+    </button>
+  </div>
+  <div class="segnalazioni-list" id="segList"></div>
+</div>
+
+<!-- ── Modale Dettaglio ──────────────────────────────────────────────────── -->
+<div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true">
+  <div class="modal-sheet">
+    <div class="modal-drag"></div>
+    <div class="modal-header">
+      <span class="modal-title">Dettaglio Segnalazione</span>
+      <button class="btn-close-modal" id="btnCloseModal" aria-label="Chiudi">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script src="/pwa/doxy/app.js"></script>
+</body>
+</html>

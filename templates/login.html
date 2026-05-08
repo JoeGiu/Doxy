@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Gestione Doxy</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+          crossorigin="anonymous">
+    <style>
+        body {
+            background-color: #f0f2f5;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-card {
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+            width: 100%;
+            max-width: 420px;
+        }
+        .login-header {
+            background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+            border-radius: 16px 16px 0 0;
+            padding: 2rem;
+            text-align: center;
+            color: #fff;
+        }
+        .login-header svg {
+            margin-bottom: 0.75rem;
+        }
+        .login-header h4 {
+            font-weight: 700;
+            margin: 0;
+            letter-spacing: 0.5px;
+        }
+        .login-body {
+            padding: 2rem;
+        }
+        .btn-login {
+            font-weight: 600;
+            letter-spacing: 0.4px;
+        }
+        .form-control:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 0.2rem rgba(13,110,253,.2);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-card card">
+        <!-- Header con logo e titolo -->
+        <div class="login-header">
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor"
+                 class="bi bi-database-fill d-block mx-auto" viewBox="0 0 16 16">
+                <path d="M3.904 1.777C4.978 1.289 6.427 1 8 1s3.022.289 4.096.777C13.125 2.245 14 2.993 14 4s-.875 1.755-1.904 2.223C11.022 6.711 9.573 7 8 7s-3.022-.289-4.096-.777C2.875 5.755 2 5.007 2 4s.875-1.755 1.904-2.223"/>
+                <path d="M2 6.161V7c0 1.007.875 1.755 1.904 2.223C4.978 9.71 6.427 10 8 10s3.022-.29 4.096-.777C13.125 8.755 14 8.007 14 7v-.839c-.457.432-1.004.751-1.49.972C11.278 7.684 9.682 8 8 8s-3.278-.316-4.51-.867c-.486-.22-1.033-.54-1.49-.972"/>
+                <path d="M2 9.161V10c0 1.007.875 1.755 1.904 2.223C4.978 12.711 6.427 13 8 13s3.022-.289 4.096-.777C13.125 11.755 14 11.007 14 10v-.839c-.457.432-1.004.751-1.49.972C11.278 10.684 9.682 11 8 11s-3.278-.316-4.51-.867c-.486-.22-1.033-.54-1.49-.972"/>
+                <path d="M2 12.161V13c0 1.007.875 1.755 1.904 2.223C4.978 15.711 6.427 16 8 16s3.022-.289 4.096-.777C13.125 14.755 14 14.007 14 13v-.839c-.457.432-1.004.751-1.49.972C11.278 13.684 9.682 14 8 14s-3.278-.316-4.51-.867c-.486-.22-1.033-.54-1.49-.972"/>
+            </svg>
+            <h4>Gestione Doxy</h4>
+            <small class="opacity-75">Accedi per continuare</small>
+        </div>
+
+        <!-- Form di login -->
+        <div class="login-body">
+            <!-- Messaggio di errore flash -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible d-flex align-items-center py-2 mb-3" role="alert">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor"
+                     class="bi bi-exclamation-triangle-fill me-2 flex-shrink-0" viewBox="0 0 16 16">
+                    <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5m.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2"/>
+                </svg>
+                {{ message }}
+                <button type="button" class="btn-close btn-close-sm ms-auto" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+            <form method="POST" action="/login" novalidate>
+                <div class="mb-3">
+                    <label for="email" class="form-label fw-semibold">Email</label>
+                    <input type="email" class="form-control" id="email" name="email"
+                           placeholder="utente@esempio.it" required autofocus>
+                </div>
+                <div class="mb-4">
+                    <label for="password" class="form-label fw-semibold">Password</label>
+                    <input type="password" class="form-control" id="password" name="password"
+                           placeholder="••••••••" required>
+                </div>
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary btn-login">Accedi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc4s9bIOgUxi8T/jzmUjxGKW7R9mBrfMqA5eVoFIkUpN"
+            crossorigin="anonymous"></script>
+</body>
+</html>

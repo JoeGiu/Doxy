@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title }}{% endblock %}
+{% block content %}
+
+<div class="d-flex align-items-center mb-4">
+    <a href="/commesse" class="btn btn-outline-secondary btn-sm me-3">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+             class="bi bi-arrow-left me-1" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/>
+        </svg>
+        Torna alle Commesse
+    </a>
+    <h2 class="fw-bold text-dark mb-0">{{ page_title }}</h2>
+</div>
+
+<form method="POST" action="{{ form_action }}" id="formCommessa" novalidate>
+    <!-- ── TESTATA ──────────────────────────────────────────────────── -->
+    <div class="card mb-4">
+        <div class="card-body p-4">
+            <h6 class="text-uppercase text-muted fw-semibold small mb-3 border-bottom pb-2">
+                Dati Commessa
+            </h6>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label for="numero_commessa" class="form-label fw-semibold">
+                        Numero Commessa <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" class="form-control" id="numero_commessa" name="numero_commessa"
+                           value="{{ form.get('numero_commessa', '') if form else '' }}" required>
+                </div>
+                <div class="col-md-4">
+                    <label for="data_entrata" class="form-label fw-semibold">
+                        Data Entrata <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" class="form-control" id="data_entrata" name="data_entrata"
+                           value="{{ form.get('data_entrata', '') if form else '' }}"
+                           placeholder="es. 01/01/2024" required>
+                </div>
+                <div class="col-md-4">
+                    <label for="data_uscita" class="form-label fw-semibold">Data Uscita</label>
+                    <input type="text" class="form-control" id="data_uscita" name="data_uscita"
+                           value="{{ form.get('data_uscita', '') if form else '' }}"
+                           placeholder="es. 05/01/2024">
+                </div>
+                <div class="col-md-6">
+                    <label for="id_veicolo" class="form-label fw-semibold">Veicolo</label>
+                    <select class="form-select" id="id_veicolo" name="id_veicolo">
+                        <option value="">— Nessun veicolo —</option>
+                        {% for v in veicoli %}
+                        <option value="{{ v.id_veicolo }}"
+                            {% if form and form.get('id_veicolo')|string == v.id_veicolo|string %}selected{% endif %}>
+                            {{ v.targa }} — {{ v.modello }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-12">
+                    <label for="descrizione_lavori" class="form-label fw-semibold">Descrizione Lavori</label>
+                    <textarea class="form-control" id="descrizione_lavori" name="descrizione_lavori"
+                              rows="3" placeholder="Descrivi i lavori eseguiti sul veicolo...">{{ form.get('descrizione_lavori', '') if form else '' }}</textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── PEZZI MONTATI ────────────────────────────────────────────── -->
+    <div class="card mb-4">
+        <div class="card-body p-4">
+            <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
+                <h6 class="text-uppercase text-muted fw-semibold small mb-0">
+                    Pezzi Montati
+                </h6>
+                <button type="button" class="btn btn-outline-primary btn-sm" id="btnAggiungiPezzo">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor"
+                         class="bi bi-plus-lg me-1" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2"/>
+                    </svg>
+                    Aggiungi pezzo
+                </button>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-bordered align-middle mb-0" id="tabellaPezzi">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width:55%">Articolo</th>
+                            <th style="width:20%">Quantità</th>
+                            <th style="width:25%" class="text-end">Azione</th>
+                        </tr>
+                    </thead>
+                    <tbody id="corpoPezzi">
+                        <!-- Righe precompilate (modifica) o vuoto (nuovo) -->
+                        {% for art_id, qty in righe_form %}
+                        <tr>
+                            <td>
+                                <select class="form-select form-select-sm" name="righe_articolo[]" required>
+                                    <option value="">— Seleziona articolo —</option>
+                                    {% for a in articoli %}
+                                    <option value="{{ a.id_articolo }}"
+                                        {% if a.id_articolo == art_id %}selected{% endif %}>
+                                        {{ a.codice }} — {{ a.descrizione }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                            <td>
+                                <input type="number" class="form-control form-control-sm"
+                                       name="righe_quantita[]" value="{{ qty }}" min="1" required>
+                            </td>
+                            <td class="text-end">
+                                <button type="button" class="btn btn-outline-danger btn-sm btn-rimuovi-pezzo">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13"
+                                         fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
+                                        <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5"/>
+                                    </svg>
+                                    Rimuovi
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <p id="noPezziMsg" class="text-muted small mt-2 {% if righe_form %}d-none{% endif %}">
+                Nessun pezzo aggiunto. Usa "Aggiungi pezzo" per inserire gli articoli montati.
+            </p>
+        </div>
+    </div>
+
+    <!-- ── PULSANTI ──────────────────────────────────────────────────── -->
+    <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary px-4 fw-semibold">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                 class="bi bi-save me-1" viewBox="0 0 16 16">
+                <path d="M2 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H9.5a1 1 0 0 0-1 1v7.293l2.646-2.647a.5.5 0 0 1 .708.708l-3.5 3.5a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L7.5 9.293V2a2 2 0 0 1 2-2H14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h2.5a.5.5 0 0 1 0 1z"/>
+            </svg>
+            {{ submit_label }}
+        </button>
+        <a href="/commesse" class="btn btn-outline-secondary px-4">Annulla</a>
+    </div>
+
+</form>
+
+<p class="text-muted small mt-3"><span class="text-danger">*</span> Campi obbligatori</p>
+
+<!-- Template riga nascosto per clonazione JS -->
+<template id="pezzoTemplate">
+    <tr>
+        <td>
+            <select class="form-select form-select-sm" name="righe_articolo[]" required>
+                <option value="">— Seleziona articolo —</option>
+                {% for a in articoli %}
+                <option value="{{ a.id_articolo }}">{{ a.codice }} — {{ a.descrizione }}</option>
+                {% endfor %}
+            </select>
+        </td>
+        <td>
+            <input type="number" class="form-control form-control-sm"
+                   name="righe_quantita[]" value="1" min="1" required>
+        </td>
+        <td class="text-end">
+            <button type="button" class="btn btn-outline-danger btn-sm btn-rimuovi-pezzo">
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor"
+                     class="bi bi-trash3" viewBox="0 0 16 16">
+                    <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5"/>
+                </svg>
+                Rimuovi
+            </button>
+        </td>
+    </tr>
+</template>
+
+<script>
+    const corpo      = document.getElementById('corpoPezzi');
+    const noPezziMsg = document.getElementById('noPezziMsg');
+    const template   = document.getElementById('pezzoTemplate');
+
+    function aggiornaVisibilita() {
+        noPezziMsg.classList.toggle('d-none', corpo.rows.length > 0);
+    }
+
+    // Aggiungi pezzo
+    document.getElementById('btnAggiungiPezzo').addEventListener('click', function () {
+        const clone = template.content.cloneNode(true);
+        corpo.appendChild(clone);
+        aggiornaVisibilita();
+    });
+
+    // Rimuovi pezzo (event delegation per righe dinamiche)
+    corpo.addEventListener('click', function (e) {
+        const btn = e.target.closest('.btn-rimuovi-pezzo');
+        if (btn) {
+            btn.closest('tr').remove();
+            aggiornaVisibilita();
+        }
+    });
+
+    aggiornaVisibilita();
+</script>
+
+{% endblock %}

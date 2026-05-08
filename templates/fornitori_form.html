@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title }}{% endblock %}
+{% block content %}
+
+<div class="d-flex align-items-center mb-4">
+    <a href="/fornitori" class="btn btn-outline-secondary btn-sm me-3">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+             class="bi bi-arrow-left me-1" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/>
+        </svg>
+        Torna ai Fornitori
+    </a>
+    <h2 class="fw-bold text-dark mb-0">{{ page_title }}</h2>
+</div>
+
+<div class="card">
+    <div class="card-body p-4">
+        <form method="POST" action="{{ form_action }}" novalidate>
+
+            <h6 class="text-uppercase text-muted fw-semibold small mb-3 border-bottom pb-2">
+                Dati Fornitore
+            </h6>
+            <div class="row g-3 mb-4">
+                <div class="col-md-8">
+                    <label for="ragione_sociale" class="form-label fw-semibold">
+                        Ragione Sociale <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" class="form-control" id="ragione_sociale" name="ragione_sociale"
+                           value="{{ form.get('ragione_sociale', '') }}" required>
+                </div>
+                <div class="col-md-4">
+                    <label for="matricola" class="form-label fw-semibold">
+                        Matricola <span class="text-danger">*</span>
+                    </label>
+                    <input type="text" class="form-control" id="matricola" name="matricola"
+                           value="{{ form.get('matricola', '') }}" required>
+                </div>
+                <div class="col-md-4">
+                    <label for="p_iva" class="form-label fw-semibold">Partita IVA</label>
+                    <input type="text" class="form-control" id="p_iva" name="p_iva"
+                           value="{{ form.get('p_iva', '') }}" maxlength="11">
+                </div>
+                <div class="col-md-4">
+                    <label for="codice_fiscale" class="form-label fw-semibold">Codice Fiscale</label>
+                    <input type="text" class="form-control text-uppercase" id="codice_fiscale"
+                           name="codice_fiscale" maxlength="16"
+                           value="{{ form.get('codice_fiscale', '') }}">
+                </div>
+            </div>
+
+            <h6 class="text-uppercase text-muted fw-semibold small mb-3 border-bottom pb-2">
+                Contatti
+            </h6>
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <label for="email" class="form-label fw-semibold">Email</label>
+                    <input type="email" class="form-control" id="email" name="email"
+                           value="{{ form.get('email', '') }}">
+                </div>
+                <div class="col-md-3">
+                    <label for="telefono" class="form-label fw-semibold">Telefono</label>
+                    <input type="tel" class="form-control" id="telefono" name="telefono"
+                           value="{{ form.get('telefono', '') }}">
+                </div>
+            </div>
+
+            <h6 class="text-uppercase text-muted fw-semibold small mb-3 border-bottom pb-2">
+                Sede
+            </h6>
+            <div class="row g-3 mb-4">
+                <div class="col-md-8">
+                    <label for="indirizzo" class="form-label fw-semibold">Indirizzo</label>
+                    <input type="text" class="form-control" id="indirizzo" name="indirizzo"
+                           value="{{ form.get('indirizzo', '') }}">
+                </div>
+                <div class="col-md-4">
+                    <label for="citta" class="form-label fw-semibold">Città</label>
+                    <input type="text" class="form-control" id="citta" name="citta"
+                           value="{{ form.get('citta', '') }}">
+                </div>
+            </div>
+
+            <div class="d-flex gap-2 pt-2 border-top">
+                <button type="submit" class="btn btn-primary px-4 fw-semibold">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                         class="bi bi-save me-1" viewBox="0 0 16 16">
+                        <path d="M2 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H9.5a1 1 0 0 0-1 1v7.293l2.646-2.647a.5.5 0 0 1 .708.708l-3.5 3.5a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L7.5 9.293V2a2 2 0 0 1 2-2H14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h2.5a.5.5 0 0 1 0 1z"/>
+                    </svg>
+                    {{ submit_label }}
+                </button>
+                <a href="/fornitori" class="btn btn-outline-secondary px-4">Annulla</a>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<p class="text-muted small mt-3"><span class="text-danger">*</span> Campi obbligatori</p>
+{% endblock %}
