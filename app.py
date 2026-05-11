@@ -1193,6 +1193,167 @@ def commesse_elimina(id):
     flash(f'Commessa "{row["numero_commessa"]}" eliminata con successo.', 'success')
     return redirect(url_for('commesse'))
 
+
+# =========================================================================== #
+# AUTISTI
+# =========================================================================== #
+
+@app.route('/autisti')
+@login_required
+def autisti():
+    q = request.args.get('q', '').strip()
+    if q:
+        like = f'%{q}%'
+        rows, err = fetch_table(
+            "SELECT id_autista, nome, cognome, email, telefono FROM autista "
+            "WHERE nome LIKE %s OR cognome LIKE %s OR email LIKE %s "
+            "ORDER BY cognome, nome",
+            (like, like, like)
+        )
+    else:
+        rows, err = fetch_table(
+            "SELECT id_autista, nome, cognome, email, telefono FROM autista "
+            "ORDER BY cognome, nome"
+        )
+    if err:
+        flash(f'Errore database: {err}', 'danger')
+        rows = []
+    return render_template('table.html',
+        active_page='autisti',
+        page_title='Gestione Autisti',
+        columns=['Nome', 'Cognome', 'Email', 'Telefono'],
+        column_keys=['nome', 'cognome', 'email', 'telefono'],
+        rows=rows,
+        new_url='/autisti/nuovo',
+        new_label='Nuovo Autista',
+        row_edit_url='/autisti/modifica',
+        row_id_key='id_autista',
+        row_delete_url='/autisti/elimina',
+        row_delete_label_keys=['nome', 'cognome'],
+        search_url='/autisti',
+        search_query=q,
+    )
+
+
+@app.route('/autisti/nuovo', methods=['GET', 'POST'])
+@login_required
+def autisti_nuovo():
+    if request.method == 'POST':
+        nome     = request.form.get('nome', '').strip()
+        cognome  = request.form.get('cognome', '').strip()
+        email    = request.form.get('email', '').strip()
+        password = request.form.get('password', '').strip()
+        telefono = request.form.get('telefono', '').strip() or None
+        if not all([nome, cognome, email, password]):
+            flash('Nome, cognome, email e password sono obbligatori.', 'danger')
+            return render_template('autisti_form.html',
+                active_page='autisti',
+                page_title='Nuovo Autista',
+                form_action='/autisti/nuovo',
+                submit_label='Crea Autista',
+                form=request.form)
+        try:
+            conn = get_db_connection()
+            with conn.cursor() as cur:
+                cur.execute("SELECT COALESCE(MAX(id_autista), 0) + 1 AS nid FROM autista")
+                next_id = cur.fetchone()['nid']
+                cur.execute(
+                    "INSERT INTO autista (id_autista, nome, cognome, email, password, telefono) "
+                    "VALUES (%s,%s,%s,%s,%s,%s)",
+                    (next_id, nome, cognome, email, password, telefono)
+                )
+            conn.commit(); conn.close()
+        except pymysql.MySQLError as e:
+            flash(f'Errore database: {e}', 'danger')
+            return render_template('autisti_form.html',
+                active_page='autisti',
+                page_title='Nuovo Autista',
+                form_action='/autisti/nuovo',
+                submit_label='Crea Autista',
+                form=request.form)
+        flash(f'Autista {nome} {cognome} creato con successo.', 'success')
+        return redirect(url_for('autisti'))
+    return render_template('autisti_form.html',
+        active_page='autisti',
+        page_title='Nuovo Autista',
+        form_action='/autisti/nuovo',
+        submit_label='Crea Autista',
+        form={})
+
+
+@app.route('/autisti/modifica/<int:id>', methods=['GET', 'POST'])
+@login_required
+def autisti_modifica(id):
+    if request.method == 'POST':
+        nome     = request.form.get('nome', '').strip()
+        cognome  = request.form.get('cognome', '').strip()
+        email    = request.form.get('email', '').strip()
+        password = request.form.get('password', '').strip()
+        telefono = request.form.get('telefono', '').strip() or None
+        if not all([nome, cognome, email, password]):
+            flash('Nome, cognome, email e password sono obbligatori.', 'danger')
+            return render_template('autisti_form.html',
+                active_page='autisti',
+                page_title='Modifica Autista',
+                form_action=f'/autisti/modifica/{id}',
+                submit_label='Salva Modifiche',
+                form=request.form)
+        try:
+            conn = get_db_connection()
+            with conn.cursor() as cur:
+                cur.execute(
+                    "UPDATE autista SET nome=%s, cognome=%s, email=%s, password=%s, telefono=%s "
+                    "WHERE id_autista=%s",
+                    (nome, cognome, email, password, telefono, id)
+                )
+            conn.commit(); conn.close()
+        except pymysql.MySQLError as e:
+            flash(f'Errore database: {e}', 'danger')
+            return render_template('autisti_form.html',
+                active_page='autisti',
+                page_title='Modifica Autista',
+                form_action=f'/autisti/modifica/{id}',
+                submit_label='Salva Modifiche',
+                form=request.form)
+        flash(f'Autista {nome} {cognome} aggiornato con successo.', 'success')
+        return redirect(url_for('autisti'))
+    # GET — precompila dal DB
+    rows, err = fetch_table(
+        "SELECT * FROM autista WHERE id_autista=%s", (id,)
+    )
+    if err or not rows:
+        flash('Autista non trovato.', 'danger')
+        return redirect(url_for('autisti'))
+    return render_template('autisti_form.html',
+        active_page='autisti',
+        page_title='Modifica Autista',
+        form_action=f'/autisti/modifica/{id}',
+        submit_label='Salva Modifiche',
+        form=rows[0])
+
+
+@app.route('/autisti/elimina/<int:id>', methods=['POST'])
+@login_required
+def autisti_elimina(id):
+    rows, err = fetch_table(
+        "SELECT nome, cognome FROM autista WHERE id_autista=%s", (id,)
+    )
+    if err or not rows:
+        flash('Autista non trovato.', 'danger')
+        return redirect(url_for('autisti'))
+    row = rows[0]
+    try:
+        conn = get_db_connection()
+        with conn.cursor() as cur:
+            cur.execute("DELETE FROM autista WHERE id_autista=%s", (id,))
+        conn.commit(); conn.close()
+    except pymysql.MySQLError as e:
+        flash(f'Errore database: {e}', 'danger')
+        return redirect(url_for('autisti'))
+    flash(f'Autista {row["nome"]} {row["cognome"]} eliminato con successo.', 'success')
+    return redirect(url_for('autisti'))
+
+
 # =========================================================================== #
 # API REST
 # =========================================================================== #
