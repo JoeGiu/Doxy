@@ -1354,6 +1354,128 @@ def autisti_elimina(id):
 
 
 # =========================================================================== #
+# SEGNALAZIONI (webapp)
+# =========================================================================== #
+
+@app.route('/segnalazioni')
+@login_required
+def segnalazioni():
+    q = request.args.get('q', '').strip()
+    where = ''
+    params = ()
+    if q:
+        like = f'%{q}%'
+        where = "WHERE v.targa LIKE %s OR v.modello LIKE %s OR a.nome LIKE %s OR a.cognome LIKE %s"
+        params = (like, like, like, like)
+    sql = """
+        SELECT s.id_segnalazione,
+               s.data_segnalazione,
+               s.descrizione,
+               s.foto_path,
+               a.nome  AS autista_nome,
+               a.cognome AS autista_cognome,
+               v.targa,
+               v.modello,
+               IF(COUNT(l.id_lettura) > 0, 'letta', 'nuova') AS stato
+        FROM segnalazione s
+        JOIN autista a ON s.id_autista = a.id_autista
+        JOIN veicolo  v ON s.id_veicolo  = v.id_veicolo
+        LEFT JOIN lettura_segnalazione l ON l.id_segnalazione = s.id_segnalazione
+        {where}
+        GROUP BY s.id_segnalazione,
+                 s.data_segnalazione, s.descrizione, s.foto_path,
+                 a.nome, a.cognome, v.targa, v.modello
+        ORDER BY s.data_segnalazione DESC
+    """.format(where=where)
+    rows, err = fetch_table(sql, params if params else None)
+    if err:
+        flash(f'Errore database: {err}', 'danger')
+        rows = []
+    return render_template('segnalazioni.html',
+        active_page='segnalazioni',
+        page_title='Segnalazioni Veicoli',
+        righe=rows,
+        search_url='/segnalazioni',
+        search_query=q,
+    )
+
+
+@app.route('/segnalazioni/<int:seg_id>')
+@login_required
+def segnalazione_dettaglio(seg_id):
+    # Dati segnalazione
+    rows, err = fetch_table("""
+        SELECT s.id_segnalazione, s.descrizione, s.foto_path,
+               s.data_segnalazione, s.stato,
+               a.nome AS autista_nome, a.cognome AS autista_cognome,
+               a.telefono AS autista_tel,
+               v.targa, v.modello
+        FROM segnalazione s
+        JOIN autista a ON s.id_autista = a.id_autista
+        JOIN veicolo  v ON s.id_veicolo  = v.id_veicolo
+        WHERE s.id_segnalazione = %s
+    """, (seg_id,))
+    if err or not rows:
+        flash('Segnalazione non trovata.', 'danger')
+        return redirect(url_for('segnalazioni'))
+    seg = rows[0]
+
+    # Lista letture
+    letture, _ = fetch_table("""
+        SELECT u.nome, u.cognome, l.data_lettura
+        FROM lettura_segnalazione l
+        JOIN utente u ON l.id_utente = u.id_utente
+        WHERE l.id_segnalazione = %s
+        ORDER BY l.data_lettura
+    """, (seg_id,))
+
+    # Registra lettura per l'utente corrente (evita duplicati)
+    try:
+        utente_rows, _ = fetch_table(
+            "SELECT id_utente FROM utente WHERE email=%s",
+            (session['user_email'],)
+        )
+        if utente_rows:
+            id_utente = utente_rows[0]['id_utente']
+            gia_letta, _ = fetch_table(
+                "SELECT id_lettura FROM lettura_segnalazione "
+                "WHERE id_segnalazione=%s AND id_utente=%s",
+                (seg_id, id_utente)
+            )
+            if not gia_letta:
+                conn = get_db_connection()
+                with conn.cursor() as cur:
+                    cur.execute(
+                        "SELECT COALESCE(MAX(id_lettura), 0) + 1 AS nid "
+                        "FROM lettura_segnalazione"
+                    )
+                    next_id = cur.fetchone()['nid']
+                    cur.execute(
+                        "INSERT INTO lettura_segnalazione "
+                        "(id_lettura, id_segnalazione, id_utente) "
+                        "VALUES (%s,%s,%s)",
+                        (next_id, seg_id, id_utente)
+                    )
+                conn.commit(); conn.close()
+                # Ricarica letture aggiornate
+                letture, _ = fetch_table("""
+                    SELECT u.nome, u.cognome, l.data_lettura
+                    FROM lettura_segnalazione l
+                    JOIN utente u ON l.id_utente = u.id_utente
+                    WHERE l.id_segnalazione = %s
+                    ORDER BY l.data_lettura
+                """, (seg_id,))
+    except pymysql.MySQLError as e:
+        flash(f'Errore registrazione lettura: {e}', 'danger')
+
+    return render_template('segnalazione_dettaglio.html',
+        active_page='segnalazioni',
+        seg=seg,
+        letture=letture or [],
+    )
+
+
+# =========================================================================== #
 # API REST
 # =========================================================================== #
 
